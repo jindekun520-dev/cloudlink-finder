@@ -2,6 +2,6 @@
     "defaults": {
         "run-as": "package"
     },
-    "username": "pansearch",
-    "groupname": "pansearch"
+    "username": "cloudlink-finder",
+    "groupname": "cloudlink-finder"
 }

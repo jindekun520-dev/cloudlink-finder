@@ -1,17 +1,17 @@
 services:
-  pan-search:
+  cloudlink-finder:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         NODE_IMAGE: ${NODE_IMAGE:-docker.1ms.run/library/node:20-alpine}
         PYTHON_IMAGE: ${PYTHON_IMAGE:-docker.1ms.run/library/python:3.12-slim}
-    container_name: pan-search
+    container_name: cloudlink-finder
     restart: unless-stopped
     ports:
       - "${PORT:-8899}:80"
     volumes:
-      - /var/apps/third-pan-search/shares/third-pan-search/data:/app/data
+      - /var/apps/cloudlink-finder/shares/cloudlink-finder/data:/app/data
     environment:
       TZ: Asia/Shanghai
       PANSEARCH_DATA_DIR: /app/data

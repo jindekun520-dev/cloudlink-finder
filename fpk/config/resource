@@ -2,7 +2,7 @@
     "docker-project": {
         "projects": [
             {
-                "name": "pan-search",
+                "name": "cloudlink-finder",
                 "path": "docker"
             }
         ]
@@ -10,10 +10,10 @@
     "data-share": {
         "shares": [
             {
-                "name": "third-pan-search"
+                "name": "cloudlink-finder"
             },
             {
-                "name": "third-pan-search/data"
+                "name": "cloudlink-finder/data"
             }
         ]
     }

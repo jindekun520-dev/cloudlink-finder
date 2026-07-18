@@ -31,7 +31,8 @@ done
 python3 -m json.tool "$WORK_DIR/config/privilege" >/dev/null
 python3 -m json.tool "$WORK_DIR/config/resource" >/dev/null
 bash -n "$WORK_DIR/cmd/main"
-grep -Eq '^desktop_applaunchname[[:space:]]*=[[:space:]]*third-pan-search\.CloudLinkFinder[[:space:]]*$' "$WORK_DIR/manifest"
+grep -Eq '^appname[[:space:]]*=[[:space:]]*cloudlink-finder[[:space:]]*$' "$WORK_DIR/manifest"
+grep -Eq '^desktop_applaunchname[[:space:]]*=[[:space:]]*cloudlink-finder\.CloudLinkFinder[[:space:]]*$' "$WORK_DIR/manifest"
 
 python3 - "$WORK_DIR/ICON.PNG" 64 "$WORK_DIR/ICON_256.PNG" 256 <<'PY'
 import struct
@@ -46,7 +47,7 @@ for index in range(1, len(sys.argv), 2):
     width, height, bit_depth, color_type, _, _, _ = struct.unpack(">IIBBBBB", data[16:29])
     assert (width, height) == (expected_size, expected_size), f"{path} 尺寸错误"
     assert bit_depth == 8, f"{path} 位深错误"
-    assert color_type == 2, f"{path} 必须是无 Alpha 的 RGB PNG"
+    assert color_type == 6, f"{path} 必须是带 Alpha 的 RGBA PNG"
     assert b"sRGB" in data or b"iCCP" in data, f"{path} 缺少 sRGB 色彩信息"
 PY
 
@@ -60,24 +61,24 @@ import sys
 with open(sys.argv[1], encoding="utf-8") as handle:
     config = json.load(handle)
 
-assert set(config[".url"]) == {"third-pan-search.CloudLinkFinder"}
-entry = config[".url"]["third-pan-search.CloudLinkFinder"]
+assert set(config[".url"]) == {"cloudlink-finder.CloudLinkFinder"}
+entry = config[".url"]["cloudlink-finder.CloudLinkFinder"]
 assert entry["title"] == "网盘搜索神器"
-assert entry["icon"] == "images/cloudlink_finder_{0}.png"
+assert entry["icon"] == "images/cloudlink_finder_v107_{0}.png"
 assert entry["type"] == "url"
 assert entry["protocol"] == "http"
 assert entry["port"] == "8899"
 assert entry["url"] == "/"
 PY
 
-for path in docker/docker-compose.yaml docker/Dockerfile docker/backend/app/main.py docker/frontend/package.json docker/nginx/default.conf docker/supervisor/supervisord.conf ui/config ui/images/cloudlink_finder_64.png ui/images/cloudlink_finder_256.png; do
+for path in docker/docker-compose.yaml docker/Dockerfile docker/backend/app/main.py docker/frontend/package.json docker/nginx/default.conf docker/supervisor/supervisord.conf ui/config ui/images/cloudlink_finder_v107_64.png ui/images/cloudlink_finder_v107_256.png; do
   if [[ ! -e "$WORK_DIR/app/$path" ]]; then
     echo "app.tgz 缺少必需内容：$path" >&2
     exit 1
   fi
 done
 
-python3 - "$WORK_DIR/app/ui/images/cloudlink_finder_64.png" 64 "$WORK_DIR/app/ui/images/cloudlink_finder_256.png" 256 <<'PY'
+python3 - "$WORK_DIR/app/ui/images/cloudlink_finder_v107_64.png" 64 "$WORK_DIR/app/ui/images/cloudlink_finder_v107_256.png" 256 <<'PY'
 import struct
 import sys
 
@@ -88,7 +89,7 @@ for index in range(1, len(sys.argv), 2):
         data = handle.read()
     width, height, bit_depth, color_type, _, _, _ = struct.unpack(">IIBBBBB", data[16:29])
     assert (width, height) == (expected_size, expected_size), f"{path} 尺寸错误"
-    assert bit_depth == 8 and color_type == 2, f"{path} 必须是无 Alpha 的 RGB PNG"
+    assert bit_depth == 8 and color_type == 6, f"{path} 必须是带 Alpha 的 RGBA PNG"
     assert b"sRGB" in data or b"iCCP" in data, f"{path} 缺少 sRGB 色彩信息"
 PY
 

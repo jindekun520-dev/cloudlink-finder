@@ -1,8 +1,8 @@
 {
   ".url": {
-    "third-pan-search.CloudLinkFinder": {
+    "cloudlink-finder.CloudLinkFinder": {
       "title": "网盘搜索神器",
-      "icon": "images/cloudlink_finder_{0}.png",
+      "icon": "images/cloudlink_finder_v107_{0}.png",
       "type": "url",
       "protocol": "http",
       "port": "8899",

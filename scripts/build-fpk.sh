@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FNPACK_VERSION="1.2.3"
-APP_NAME="third-pan-search"
+APP_NAME="cloudlink-finder"
 PACKAGE_NAME="cloudlink-finder"
 
 manifest_value() {
@@ -97,8 +97,8 @@ trap cleanup EXIT
 rsync -a --exclude '.DS_Store' "$ROOT_DIR/fpk/" "$STAGING_DIR/"
 cp "$ROOT_DIR/ICON.PNG" "$STAGING_DIR/ICON.PNG"
 cp "$ROOT_DIR/ICON_256.PNG" "$STAGING_DIR/ICON_256.PNG"
-cp "$ROOT_DIR/ICON.PNG" "$STAGING_DIR/app/ui/images/cloudlink_finder_64.png"
-cp "$ROOT_DIR/ICON_256.PNG" "$STAGING_DIR/app/ui/images/cloudlink_finder_256.png"
+cp "$ROOT_DIR/ICON.PNG" "$STAGING_DIR/app/ui/images/cloudlink_finder_v107_64.png"
+cp "$ROOT_DIR/ICON_256.PNG" "$STAGING_DIR/app/ui/images/cloudlink_finder_v107_256.png"
 cp "$ROOT_DIR/docker/Dockerfile" "$STAGING_DIR/app/docker/Dockerfile"
 
 rsync -a \
