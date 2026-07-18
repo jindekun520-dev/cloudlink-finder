@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     # 应用基本信息
     APP_NAME: str = "网盘资源搜索神器"
-    APP_VERSION: str = "1.0.4"
+    APP_VERSION: str = "1.0.5"
     DEBUG: bool = False
 
     # 服务配置
