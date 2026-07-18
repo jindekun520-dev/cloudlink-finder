@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { API_BASE } from '../api/base'
 
 export interface SearchItem {
   title: string
@@ -43,7 +42,7 @@ export const useSearchStore = defineStore('search', () => {
 
   async function fetchCloudTypes() {
     try {
-      const res = await fetch(`${API_BASE}/sources/types`)
+      const res = await fetch('/api/sources/types')
       const data = await res.json()
       if (data.code === 0) {
         cloudTypes.value = data.data
@@ -53,7 +52,7 @@ export const useSearchStore = defineStore('search', () => {
 
   async function fetchHotKeywords() {
     try {
-      const res = await fetch(`${API_BASE}/hot`)
+      const res = await fetch('/api/hot')
       const data = await res.json()
       if (data.code === 0) {
         hotKeywords.value = data.data
@@ -63,7 +62,7 @@ export const useSearchStore = defineStore('search', () => {
 
   async function fetchHistory() {
     try {
-      const res = await fetch(`${API_BASE}/history`)
+      const res = await fetch('/api/history')
       const data = await res.json()
       if (data.code === 0) {
         history.value = data.data
@@ -93,7 +92,7 @@ export const useSearchStore = defineStore('search', () => {
       params.set('size', String(pageSize.value))
       params.set('sort', sortBy.value)
 
-      const res = await fetch(`${API_BASE}/search?${params.toString()}`, {
+      const res = await fetch(`/api/search?${params.toString()}`, {
         signal: activeController.signal,
       })
       const data = await res.json()

@@ -78,7 +78,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useThemeStore, type ThemeMode } from '../stores/theme'
-import { API_BASE } from '../api/base'
 
 const themeStore = useThemeStore()
 
@@ -100,7 +99,7 @@ const sourceError = ref('')
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/sources`)
+    const res = await fetch('/api/sources')
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
     if (data.code === 0) {

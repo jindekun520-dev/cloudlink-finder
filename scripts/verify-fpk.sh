@@ -45,10 +45,10 @@ with open(sys.argv[1], encoding="utf-8") as handle:
 entry = config[".url"]["third-pan-search.Application"]
 assert entry["title"] == "网盘搜索神器"
 assert entry["icon"] == "images/icon_{0}.png"
-assert entry["type"] == "iframe"
-assert entry["gatewayPrefix"] == "/app/third-pan-search"
-assert entry["gatewaySocket"] == "app.sock"
-assert entry["url"] == "/app/third-pan-search/"
+assert entry["type"] == "url"
+assert entry["protocol"] == "http"
+assert entry["port"] == "8899"
+assert entry["url"] == "/"
 PY
 
 for path in docker/docker-compose.yaml docker/Dockerfile docker/backend/app/main.py docker/frontend/package.json docker/nginx/default.conf docker/supervisor/supervisord.conf ui/config ui/images/icon_64.png ui/images/icon_256.png; do

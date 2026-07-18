@@ -1,11 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-const GATEWAY_PREFIX = '/app/third-pan-search'
-const isGatewayPath = window.location.pathname === GATEWAY_PREFIX
-  || window.location.pathname.startsWith(`${GATEWAY_PREFIX}/`)
-
 const router = createRouter({
-  history: createWebHistory(isGatewayPath ? `${GATEWAY_PREFIX}/` : '/'),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',

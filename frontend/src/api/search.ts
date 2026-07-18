@@ -1,7 +1,7 @@
 /**
  * 搜索API封装
  */
-import { API_BASE } from './base'
+const BASE = '/api'
 
 export const searchAPI = {
   async search(params: {
@@ -18,32 +18,32 @@ export const searchAPI = {
     if (params.size) query.set('size', String(params.size))
     if (params.sort) query.set('sort', params.sort)
 
-    const res = await fetch(`${API_BASE}/search?${query.toString()}`)
+    const res = await fetch(`${BASE}/search?${query.toString()}`)
     return res.json()
   },
 
   async getHot(limit = 10) {
-    const res = await fetch(`${API_BASE}/hot?limit=${limit}`)
+    const res = await fetch(`${BASE}/hot?limit=${limit}`)
     return res.json()
   },
 
   async getHistory(limit = 20) {
-    const res = await fetch(`${API_BASE}/history?limit=${limit}`)
+    const res = await fetch(`${BASE}/history?limit=${limit}`)
     return res.json()
   },
 
   async clearHistory() {
-    const res = await fetch(`${API_BASE}/history`, { method: 'DELETE' })
+    const res = await fetch(`${BASE}/history`, { method: 'DELETE' })
     return res.json()
   },
 
   async getCloudTypes() {
-    const res = await fetch(`${API_BASE}/sources/types`)
+    const res = await fetch(`${BASE}/sources/types`)
     return res.json()
   },
 
   async getSources() {
-    const res = await fetch(`${API_BASE}/sources`)
+    const res = await fetch(`${BASE}/sources`)
     return res.json()
   },
 }
