@@ -22,6 +22,7 @@ npm-debug.log*
 build/
 release/*.fpk
 release/**/*.fpk
+tmp/
 
 # IDE / OS
 .DS_Store

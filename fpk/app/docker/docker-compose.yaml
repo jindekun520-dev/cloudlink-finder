@@ -12,6 +12,7 @@ services:
       - "${PORT:-8899}:80"
     volumes:
       - /var/apps/third-pan-search/shares/third-pan-search/data:/app/data
+      - /var/apps/third-pan-search/target:/var/run/pan-search
     environment:
       TZ: Asia/Shanghai
       PANSEARCH_DATA_DIR: /app/data

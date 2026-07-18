@@ -35,6 +35,22 @@ bash -n "$WORK_DIR/cmd/main"
 mkdir -p "$WORK_DIR/app"
 tar -xzf "$WORK_DIR/app.tgz" -C "$WORK_DIR/app"
 
+python3 - "$WORK_DIR/app/ui/config" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    config = json.load(handle)
+
+entry = config[".url"]["third-pan-search.Application"]
+assert entry["title"] == "网盘搜索神器"
+assert entry["icon"] == "images/icon_{0}.png"
+assert entry["type"] == "iframe"
+assert entry["gatewayPrefix"] == "/app/third-pan-search"
+assert entry["gatewaySocket"] == "app.sock"
+assert entry["url"] == "/app/third-pan-search/"
+PY
+
 for path in docker/docker-compose.yaml docker/Dockerfile docker/backend/app/main.py docker/frontend/package.json docker/nginx/default.conf docker/supervisor/supervisord.conf ui/config ui/images/icon_64.png ui/images/icon_256.png; do
   if [[ ! -e "$WORK_DIR/app/$path" ]]; then
     echo "app.tgz 缺少必需内容：$path" >&2

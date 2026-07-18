@@ -1,13 +1,14 @@
 {
   ".url": {
     "third-pan-search.Application": {
-      "title": "{display_name}",
+      "title": "网盘搜索神器",
       "icon": "images/icon_{0}.png",
-      "type": "url",
-      "protocol": "http",
-      "port": "{port}",
-      "url": "/",
-      "allUsers": false
+      "type": "iframe",
+      "protocol": "",
+      "gatewayPrefix": "/app/third-pan-search",
+      "gatewaySocket": "app.sock",
+      "url": "/app/third-pan-search/",
+      "allUsers": true
     }
   }
 }
