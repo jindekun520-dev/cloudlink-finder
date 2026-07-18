@@ -1,0 +1,42 @@
+#!/bin/bash
+# ============================================
+# 网盘搜索神器 - 生命周期管理脚本
+# 飞牛应用中心通过此脚本管理 Docker 容器的启停
+# ============================================
+
+set -e
+
+FILE_PATH="${TRIM_APPDEST}/docker/docker-compose.yaml"
+
+is_docker_running() {
+    DOCKER_NAME="pan-search"
+    if [ -f "$FILE_PATH" ]; then
+        if docker inspect "$DOCKER_NAME" 2>/dev/null | grep -q '"Status": "running"'; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+case $1 in
+start)
+    # Docker 应用的启停由应用中心通过 docker compose 管理
+    # 这里只需返回成功
+    exit 0
+    ;;
+stop)
+    # 应用中心会执行 docker compose down
+    exit 0
+    ;;
+status)
+    if is_docker_running; then
+        exit 0    # 运行中
+    else
+        exit 3    # 未运行
+    fi
+    ;;
+*)
+    echo "Usage: $0 {start|stop|status}"
+    exit 1
+    ;;
+esac

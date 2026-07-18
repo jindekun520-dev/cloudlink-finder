@@ -1,0 +1,45 @@
+# 搜索源配置文件
+# 内置预设的搜索源列表
+# 应用更新时可替换此文件来更新内置搜索源
+
+sources:
+  # 主搜索源：使用结构化频道/插件索引，每条链接有独立作品标题，
+  # 比从普通网页搜索摘要中猜测链接归属更准确。
+  - name: "PanSou聚合"
+    type: "pansou"
+    enabled: true
+    endpoint: "https://so.252035.xyz/api/search"
+    timeout: 8
+
+  # 百度搜索引擎（通过 site: 语法搜索网盘公开页）
+  - name: "百度搜索"
+    type: "search_engine"
+    enabled: false
+
+  # 必应搜索引擎
+  - name: "必应搜索"
+    type: "search_engine"
+    enabled: true
+
+  # 搜狗在中文网盘资源摘要上的可用性通常优于普通网页搜索
+  - name: "搜狗搜索"
+    type: "search_engine"
+    enabled: true
+
+  # 备用中文搜索源，搜狗触发反爬时提供补充结果
+  - name: "360搜索"
+    type: "search_engine"
+    enabled: false
+
+  # 自定义搜索API源示例（可在此添加更多）
+  # - name: "示例API源"
+  #   type: "api"
+  #   enabled: false
+  #   endpoint: "https://example.com/api/search"
+  #   method: "GET"
+  #   response_path: "data.items"
+  #   field_map:
+  #     title: "title"
+  #     cloud_type: "cloud_type"
+  #     share_url: "url"
+  #     share_code: "password"

@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Local configuration and runtime data
+.env
+.claude/
+backend/data/*.db
+backend/data/*.sqlite
+backend/data/*.sqlite3
+*.log
+
+# Node.js
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/

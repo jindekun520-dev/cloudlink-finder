@@ -1,0 +1,22 @@
+[
+    {
+        "stepTitle": "安装确认",
+        "items": [
+            {
+                "type": "tips",
+                "helpText": "网盘资源搜索神器将安装以下内容：\n• 搜索聚合引擎（百度 + 必应搜索源）\n• Web 管理界面（端口 8899）\n\n支持搜索夸克、百度、阿里云盘等9种主流网盘资源。"
+            },
+            {
+                "type": "switch",
+                "field": "wizard_risk_acknowledged",
+                "label": "我已了解此应用的功能并确认安装",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请先确认安装"
+                    }
+                ]
+            }
+        ]
+    }
+]
