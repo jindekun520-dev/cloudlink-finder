@@ -31,6 +31,7 @@ done
 python3 -m json.tool "$WORK_DIR/config/privilege" >/dev/null
 python3 -m json.tool "$WORK_DIR/config/resource" >/dev/null
 bash -n "$WORK_DIR/cmd/main"
+grep -Eq '^desktop_applaunchname[[:space:]]*=[[:space:]]*third-pan-search\.CloudLinkFinder[[:space:]]*$' "$WORK_DIR/manifest"
 
 python3 - "$WORK_DIR/ICON.PNG" 64 "$WORK_DIR/ICON_256.PNG" 256 <<'PY'
 import struct
@@ -59,23 +60,24 @@ import sys
 with open(sys.argv[1], encoding="utf-8") as handle:
     config = json.load(handle)
 
-entry = config[".url"]["third-pan-search.Application"]
+assert set(config[".url"]) == {"third-pan-search.CloudLinkFinder"}
+entry = config[".url"]["third-pan-search.CloudLinkFinder"]
 assert entry["title"] == "网盘搜索神器"
-assert entry["icon"] == "images/icon_{0}.png"
+assert entry["icon"] == "images/cloudlink_finder_{0}.png"
 assert entry["type"] == "url"
 assert entry["protocol"] == "http"
 assert entry["port"] == "8899"
 assert entry["url"] == "/"
 PY
 
-for path in docker/docker-compose.yaml docker/Dockerfile docker/backend/app/main.py docker/frontend/package.json docker/nginx/default.conf docker/supervisor/supervisord.conf ui/config ui/images/icon_64.png ui/images/icon_256.png; do
+for path in docker/docker-compose.yaml docker/Dockerfile docker/backend/app/main.py docker/frontend/package.json docker/nginx/default.conf docker/supervisor/supervisord.conf ui/config ui/images/cloudlink_finder_64.png ui/images/cloudlink_finder_256.png; do
   if [[ ! -e "$WORK_DIR/app/$path" ]]; then
     echo "app.tgz 缺少必需内容：$path" >&2
     exit 1
   fi
 done
 
-python3 - "$WORK_DIR/app/ui/images/icon_64.png" 64 "$WORK_DIR/app/ui/images/icon_256.png" 256 <<'PY'
+python3 - "$WORK_DIR/app/ui/images/cloudlink_finder_64.png" 64 "$WORK_DIR/app/ui/images/cloudlink_finder_256.png" 256 <<'PY'
 import struct
 import sys
 
@@ -92,6 +94,11 @@ PY
 
 python3 -m json.tool "$WORK_DIR/app/ui/config" >/dev/null
 docker compose -f "$WORK_DIR/app/docker/docker-compose.yaml" config --quiet
+
+if find "$WORK_DIR/app/ui/images" -type f -name 'icon_*.png' -print -quit | grep -q .; then
+  echo "FPK 中仍包含旧缓存路径的入口图标" >&2
+  exit 1
+fi
 
 if find "$WORK_DIR/app" \( -name '.DS_Store' -o -name 'node_modules' -o -name '*.db' \) -print -quit | grep -q .; then
   echo "FPK 中包含不应打包的本地文件" >&2

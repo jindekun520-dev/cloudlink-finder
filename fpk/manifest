@@ -1,5 +1,5 @@
 appname               = third-pan-search
-version               = 1.0.5
+version               = 1.0.6
 display_name          = 网盘搜索神器
 desc                  = <p>聚合搜索夸克、百度、阿里云盘等主流网盘资源。</p><p>通过多源搜索引擎聚合，实时检索互联网上的公开网盘分享链接，支持一键复制下载。</p><p><b>支持网盘：</b>夸克、百度、阿里云盘、迅雷、天翼、UC、115、123云盘、移动云盘</p><p><b>技术栈：</b>Vue 3 + FastAPI + SQLite + Docker</p>
 platform              = all
@@ -10,7 +10,7 @@ maintainer_url        = https://github.com/jindekun520-dev/cloudlink-finder
 distributor           = CloudLink Finder
 distributor_url       = https://github.com/jindekun520-dev/cloudlink-finder
 desktop_uidir         = ui
-desktop_applaunchname = third-pan-search.Application
+desktop_applaunchname = third-pan-search.CloudLinkFinder
 service_port          = 8899
 checkport             = true
 disable_authorization_path = true

@@ -97,8 +97,8 @@ trap cleanup EXIT
 rsync -a --exclude '.DS_Store' "$ROOT_DIR/fpk/" "$STAGING_DIR/"
 cp "$ROOT_DIR/ICON.PNG" "$STAGING_DIR/ICON.PNG"
 cp "$ROOT_DIR/ICON_256.PNG" "$STAGING_DIR/ICON_256.PNG"
-cp "$ROOT_DIR/ICON.PNG" "$STAGING_DIR/app/ui/images/icon_64.png"
-cp "$ROOT_DIR/ICON_256.PNG" "$STAGING_DIR/app/ui/images/icon_256.png"
+cp "$ROOT_DIR/ICON.PNG" "$STAGING_DIR/app/ui/images/cloudlink_finder_64.png"
+cp "$ROOT_DIR/ICON_256.PNG" "$STAGING_DIR/app/ui/images/cloudlink_finder_256.png"
 cp "$ROOT_DIR/docker/Dockerfile" "$STAGING_DIR/app/docker/Dockerfile"
 
 rsync -a \
