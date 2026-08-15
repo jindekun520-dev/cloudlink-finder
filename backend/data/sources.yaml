@@ -5,7 +5,7 @@
 sources:
   # 主搜索源：使用结构化频道/插件索引，每条链接有独立作品标题，
   # 比从普通网页搜索摘要中猜测链接归属更准确。
-  - name: "PanSou聚合"
+  - name: "公开网盘聚合"
     type: "pansou"
     enabled: true
     endpoint: "https://so.252035.xyz/api/search"

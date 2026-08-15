@@ -84,6 +84,21 @@ mkdir -p "$BUILD_ROOT" "$RELEASE_DIR"
 STAGING_DIR="$(mktemp -d "$BUILD_ROOT/${APP_NAME}.XXXXXX")"
 PACK_DIR="$(mktemp -d "$BUILD_ROOT/output.XXXXXX")"
 
+# 前端必须在打包机上预构建：Dockerfile 已移除 Node 构建阶段，
+# NAS 端不会再执行 npm install，dist 缺失会直接导致镜像构建失败。
+if ! command -v npm >/dev/null 2>&1; then
+  echo "未检测到 npm，无法预构建前端产物" >&2
+  exit 1
+fi
+
+echo "正在本地预构建前端产物..."
+(cd "$ROOT_DIR/frontend" && npm ci --no-audit && npm run build)
+
+if [[ ! -f "$ROOT_DIR/frontend/dist/index.html" ]]; then
+  echo "前端预构建失败：缺少 frontend/dist/index.html" >&2
+  exit 1
+fi
+
 cleanup() {
   if [[ -d "$STAGING_DIR" ]]; then
     rm -r "$STAGING_DIR"
@@ -97,8 +112,8 @@ trap cleanup EXIT
 rsync -a --exclude '.DS_Store' "$ROOT_DIR/fpk/" "$STAGING_DIR/"
 cp "$ROOT_DIR/ICON.PNG" "$STAGING_DIR/ICON.PNG"
 cp "$ROOT_DIR/ICON_256.PNG" "$STAGING_DIR/ICON_256.PNG"
-cp "$ROOT_DIR/ICON.PNG" "$STAGING_DIR/app/ui/images/cloudlink_finder_v107_64.png"
-cp "$ROOT_DIR/ICON_256.PNG" "$STAGING_DIR/app/ui/images/cloudlink_finder_v107_256.png"
+cp "$ROOT_DIR/ICON.PNG" "$STAGING_DIR/app/ui/images/cloudlink_finder_v108_64.png"
+cp "$ROOT_DIR/ICON_256.PNG" "$STAGING_DIR/app/ui/images/cloudlink_finder_v108_256.png"
 cp "$ROOT_DIR/docker/Dockerfile" "$STAGING_DIR/app/docker/Dockerfile"
 
 rsync -a \
@@ -110,11 +125,10 @@ rsync -a \
   --exclude 'tests' \
   "$ROOT_DIR/backend/" "$STAGING_DIR/app/docker/backend/"
 
-rsync -a \
-  --exclude '.DS_Store' \
-  --exclude 'node_modules' \
-  --exclude 'dist' \
-  "$ROOT_DIR/frontend/" "$STAGING_DIR/app/docker/frontend/"
+# 镜像构建只需要 dist，源码与依赖清单仅保留 package.json 便于溯源。
+# 为了与 Dockerfile 的 COPY dist/ 保持一致，直接把产物放到 docker/dist 下。
+rsync -a --exclude '.DS_Store' "$ROOT_DIR/frontend/dist/" "$STAGING_DIR/app/docker/dist/"
+cp "$ROOT_DIR/frontend/package.json" "$STAGING_DIR/app/docker/package.json"
 
 rsync -a "$ROOT_DIR/nginx/" "$STAGING_DIR/app/docker/nginx/"
 rsync -a "$ROOT_DIR/supervisor/" "$STAGING_DIR/app/docker/supervisor/"

@@ -15,13 +15,16 @@
       <router-view />
     </main>
     <footer class="app-footer">
-      <span>网盘资源搜索神器 v1.0.7 · 支持夸克/百度/阿里/迅雷等主流网盘</span>
+      <span>网盘资源搜索神器 v{{ appVersion }} · 支持夸克/百度/阿里/迅雷等主流网盘</span>
     </footer>
   </div>
 </template>
 
 <script setup lang="ts">
 import ThemeToggle from './components/ThemeToggle.vue'
+import pkg from '../package.json'
+
+const appVersion = pkg.version
 </script>
 
 <style scoped>

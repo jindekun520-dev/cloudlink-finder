@@ -1,19 +1,10 @@
+# 前端产物在打包阶段已预构建（frontend/dist），此处不再引入 Node 构建阶段，
+# 避免 NAS 端拉取 node 镜像与执行 npm install 造成安装长时间卡住或失败。
+#
 # 显式指定公共镜像地址，避免 fnOS 将 docker.io 重定向到需要认证的
 # docker.fnnas.com 后出现 401 Unauthorized。构建时仍可通过 --build-arg 覆盖。
-ARG NODE_IMAGE=docker.1ms.run/library/node:20-alpine
 ARG PYTHON_IMAGE=docker.1ms.run/library/python:3.12-slim
 
-# ==================== 第一阶段：构建前端 ====================
-FROM ${NODE_IMAGE} AS frontend-builder
-
-WORKDIR /app/frontend
-COPY frontend/package.json frontend/package-lock.json* ./
-RUN npm ci --no-audit 2>/dev/null || npm install --no-audit
-COPY frontend/ ./
-RUN npm run build
-
-
-# ==================== 第二阶段：最终运行镜像 ====================
 FROM ${PYTHON_IMAGE}
 
 # 安装 Nginx 和 Supervisor
@@ -27,13 +18,16 @@ RUN mkdir -p /app/backend /app/data
 
 # 安装 Python 依赖
 COPY backend/requirements.txt /app/backend/
-RUN pip install --no-cache-dir -r /app/backend/requirements.txt
+RUN pip install --no-cache-dir \
+        -i https://mirrors.aliyun.com/pypi/simple/ \
+        --trusted-host mirrors.aliyun.com \
+        -r /app/backend/requirements.txt
 
 # 复制后端代码
 COPY backend/ /app/backend/
 
-# 复制前端构建产物
-COPY --from=frontend-builder /app/frontend/dist /usr/share/nginx/html
+# 复制预构建的前端产物（打包时由 scripts/build-fpk.sh 生成并校验）
+COPY dist/ /usr/share/nginx/html/
 
 # 复制 Nginx 配置
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf

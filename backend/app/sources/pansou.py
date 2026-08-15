@@ -1,6 +1,6 @@
-"""PanSou 聚合搜索源。
+"""公开网盘资源聚合搜索源。
 
-PanSou 使用 Telegram 频道与站点插件作为索引，每个链接都携带独立的
+该搜索源对接一个公开的网盘资源聚合接口，每个链接都携带独立的
 ``note``（作品标题），比从普通搜索引擎摘要中猜测“标题-链接”关系可靠。
 """
 import logging
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class PanSouSearchSource:
-    name = "PanSou聚合"
+    name = "公开网盘聚合"
     source_type = "pansou"
     enabled = True
 
@@ -71,13 +71,55 @@ class PanSouSearchSource:
                         client, fallback_params, headers, attempts=1
                     )
         except Exception as exc:
-            logger.warning("PanSou聚合搜索失败: %s", exc)
+            logger.warning("公开网盘聚合搜索失败: %s", exc)
             return []
 
         if payload is None:
             return []
 
-        return self._parse_payload(payload, cloud_types)
+        results = self._parse_payload(payload, cloud_types)
+
+        # PanSou 后端多节点部署时索引可能不一致，返回 total=0 不代表真的没有资源。
+        # 遇到空结果时延迟半秒重试一次，提高命中率。
+        if not results:
+            logger.debug("公开网盘聚合返回空结果，尝试重试: '%s'", keyword)
+            try:
+                await asyncio.sleep(0.5)
+                async with httpx.AsyncClient(
+                    timeout=self.timeout,
+                    follow_redirects=True,
+                    trust_env=False,
+                ) as client:
+                    retry_payload = await self._request_payload(
+                        client, params, headers, attempts=1
+                    )
+                    if retry_payload is not None:
+                        results = self._parse_payload(retry_payload, cloud_types)
+            except Exception:
+                pass
+
+        if results:
+            return results
+
+        # 带 cloud_types 过滤仍为空时，尝试全量请求后在本地过滤
+        if cloud_types:
+            try:
+                await asyncio.sleep(0.3)
+                async with httpx.AsyncClient(
+                    timeout=self.timeout,
+                    follow_redirects=True,
+                    trust_env=False,
+                ) as client:
+                    fallback_params = {"kw": keyword, "res": "merge"}
+                    fallback_payload = await self._request_payload(
+                        client, fallback_params, headers, attempts=1
+                    )
+                    if fallback_payload is not None:
+                        results = self._parse_payload(fallback_payload, cloud_types)
+            except Exception:
+                pass
+
+        return results
 
     async def _request_payload(
         self,
@@ -98,7 +140,7 @@ class PanSouSearchSource:
                 if attempt + 1 < attempts:
                     await asyncio.sleep(0.25)
         if last_error:
-            logger.warning("PanSou请求失败（%s）: %s", params.get("cloud_types", "全部"), last_error)
+            logger.warning("公开网盘聚合请求失败（%s）: %s", params.get("cloud_types", "全部"), last_error)
         return None
 
     def _parse_payload(
@@ -140,6 +182,7 @@ class PanSouSearchSource:
                         share_code=password,
                         description="来自结构化资源索引，返回前已进行网盘有效性检测",
                         source_name=f"{self.name}·{origin}" if origin else self.name,
+                        source_type=self.source_type,
                     )
                 )
         return results

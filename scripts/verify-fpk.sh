@@ -64,21 +64,21 @@ with open(sys.argv[1], encoding="utf-8") as handle:
 assert set(config[".url"]) == {"cloudlink-finder.CloudLinkFinder"}
 entry = config[".url"]["cloudlink-finder.CloudLinkFinder"]
 assert entry["title"] == "网盘搜索神器"
-assert entry["icon"] == "images/cloudlink_finder_v107_{0}.png"
+assert entry["icon"] == "images/cloudlink_finder_v108_{0}.png"
 assert entry["type"] == "url"
 assert entry["protocol"] == "http"
 assert entry["port"] == "8899"
 assert entry["url"] == "/"
 PY
 
-for path in docker/docker-compose.yaml docker/Dockerfile docker/backend/app/main.py docker/frontend/package.json docker/nginx/default.conf docker/supervisor/supervisord.conf ui/config ui/images/cloudlink_finder_v107_64.png ui/images/cloudlink_finder_v107_256.png; do
+for path in docker/docker-compose.yaml docker/Dockerfile docker/backend/app/main.py docker/package.json docker/dist/index.html docker/nginx/default.conf docker/supervisor/supervisord.conf ui/config ui/images/cloudlink_finder_v108_64.png ui/images/cloudlink_finder_v108_256.png; do
   if [[ ! -e "$WORK_DIR/app/$path" ]]; then
     echo "app.tgz 缺少必需内容：$path" >&2
     exit 1
   fi
 done
 
-python3 - "$WORK_DIR/app/ui/images/cloudlink_finder_v107_64.png" 64 "$WORK_DIR/app/ui/images/cloudlink_finder_v107_256.png" 256 <<'PY'
+python3 - "$WORK_DIR/app/ui/images/cloudlink_finder_v108_64.png" 64 "$WORK_DIR/app/ui/images/cloudlink_finder_v108_256.png" 256 <<'PY'
 import struct
 import sys
 
@@ -95,6 +95,14 @@ PY
 
 python3 -m json.tool "$WORK_DIR/app/ui/config" >/dev/null
 docker compose -f "$WORK_DIR/app/docker/docker-compose.yaml" config --quiet
+
+# NAS 端不应再拉取 node 镜像或执行 npm，避免安装长时间卡住。
+# 仅检查真实指令，忽略注释行。
+if grep -v '^[[:space:]]*#' "$WORK_DIR/app/docker/Dockerfile" \
+    | grep -Eqi '^[[:space:]]*(FROM|ARG).*node:|^[[:space:]]*RUN.*\bnpm\b'; then
+  echo "Dockerfile 仍包含 Node/npm 构建步骤" >&2
+  exit 1
+fi
 
 if find "$WORK_DIR/app/ui/images" -type f -name 'icon_*.png' -print -quit | grep -q .; then
   echo "FPK 中仍包含旧缓存路径的入口图标" >&2

@@ -187,44 +187,14 @@ class SearchOrchestrator:
         if not enabled_sources:
             return {"items": [], "total": 0, "page": 1, "page_size": page_size, "total_pages": 0}
 
-        tasks = []
-        for source in enabled_sources:
-            tasks.append(source.search(keyword, cloud_types))
-
         start_time = time.time()
-        source_results = await asyncio.gather(*tasks, return_exceptions=True)
-        # 收集所有结果
-        all_results: List[SearchResult] = []
-        for i, result in enumerate(source_results):
-            if isinstance(result, Exception):
-                logger.warning(f"搜索源 '{enabled_sources[i].name}' 异常: {result}")
-                continue
-            if isinstance(result, list):
-                all_results.extend(result)
-
-        # 去重和排序
-        deduped = ResultAggregator.deduplicate(all_results)
-        deduped = ResultAggregator.filter_by_keyword(deduped, keyword)
-        # 严格模式只展示存在稳定公开检测接口的网盘。单纯页面能打开并不能
-        # 证明分享文件仍存在，因此不把 unsupported 结果冒充为“有效”。
-        deduped = [
-            item
-            for item in deduped
-            if link_validator.supports_strict_check(item.cloud_type)
-        ]
-        deduped = ResultAggregator.sort(deduped, "relevance", keyword)
-        deduped = ResultAggregator.limit_diverse(
-            deduped, settings.MAX_LINKS_TO_VALIDATE
-        )
-        before_validation = len(deduped)
-        deduped = await link_validator.validate_many(deduped)
+        deduped = await self._search_sources(keyword, cloud_types, enabled_sources, keyword)
         elapsed = time.time() - start_time
         logger.info(
-            "搜索完成: '%s', %d个源, %d/%d条通过有效性检测, 耗时%.2fs",
+            "搜索完成: '%s', %d个源, %d条通过有效性检测, 耗时%.2fs",
             keyword,
             len(enabled_sources),
             len(deduped),
-            before_validation,
             elapsed,
         )
 
@@ -247,6 +217,35 @@ class SearchOrchestrator:
                         "from_cache": True,
                         "stale_fallback": True,
                         "search_time_ms": round(elapsed * 1000),
+                    }
+
+            # 长尾关键词可能因搜索源索引覆盖不足而返回空结果。
+            # 尝试用更短的关键词降级搜索作为兜底。
+            fallback_keyword = self._get_shorter_keyword(keyword)
+            if fallback_keyword:
+                logger.info(
+                    "原始关键词 '%s' 无结果，降级尝试: '%s'", keyword, fallback_keyword
+                )
+                fallback_items = await self._search_sources(
+                    fallback_keyword, cloud_types, enabled_sources, keyword
+                )
+                if fallback_items:
+                    # 用原始关键词标记降级结果
+                    for item in fallback_items:
+                        item.validation_message = (
+                            f"关键词降级匹配（搜索词: {keyword}）| "
+                            + item.validation_message
+                        )
+                    await self._save_history(db, keyword)
+                    fallback_items = ResultAggregator.sort(fallback_items, sort_by, keyword)
+                    paginated = ResultAggregator.paginate(
+                        fallback_items, page, page_size
+                    )
+                    return {
+                        **paginated,
+                        "from_cache": False,
+                        "keyword_fallback": fallback_keyword,
+                        "search_time_ms": round((time.time() - start_time) * 1000),
                     }
 
         # 缓存未排序结果，命中缓存后可以按当前 sort 参数重新排序。
@@ -282,6 +281,72 @@ class SearchOrchestrator:
             "from_cache": False,
             "search_time_ms": round(elapsed * 1000),
         }
+
+    @staticmethod
+    def _get_shorter_keyword(keyword: str) -> Optional[str]:
+        """对中文长尾关键词提取前段缩写，用于降级搜索兜底。
+
+        至少包含4个中文字符才触发降级，降级后取前3个中文字符。
+        例如：'米小圈动画三十六计' → '米小圈'
+        """
+        import re
+        chinese = re.findall(r'[\u4e00-\u9fff]', keyword)
+        if len(chinese) < 4:
+            return None
+        target_count = min(3, len(chinese) - 1)
+        result = ''
+        count = 0
+        for c in keyword:
+            result += c
+            if '\u4e00' <= c <= '\u9fff':
+                count += 1
+                if count >= target_count:
+                    break
+        short = result.strip()
+        if len(short) >= 2 and len(short) < len(keyword):
+            return short
+        return None
+
+    async def _search_sources(
+        self,
+        keyword: str,
+        cloud_types: Optional[List[str]],
+        sources: list,
+        filter_keyword: Optional[str] = None,
+    ) -> List[SearchResult]:
+        """对指定关键词执行多源搜索、聚合、过滤、验证的完整链路。
+
+        Args:
+            keyword: 发送给搜索源的关键词
+            cloud_types: 网盘类型过滤
+            sources: 已启用的搜索源列表
+            filter_keyword: 过滤和排序使用的关键词（默认与 keyword 相同）
+        """
+        filter_kw = filter_keyword or keyword
+
+        tasks = [source.search(keyword, cloud_types) for source in sources]
+        source_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        all_results: List[SearchResult] = []
+        for i, result in enumerate(source_results):
+            if isinstance(result, Exception):
+                logger.warning(f"降级搜索源 '{sources[i].name}' 异常: {result}")
+                continue
+            if isinstance(result, list):
+                all_results.extend(result)
+
+        deduped = ResultAggregator.deduplicate(all_results)
+        deduped = ResultAggregator.filter_by_keyword(deduped, filter_kw)
+        deduped = [
+            item
+            for item in deduped
+            if link_validator.supports_strict_check(item.cloud_type)
+        ]
+
+        deduped = ResultAggregator.sort(deduped, "relevance", filter_kw)
+        deduped = ResultAggregator.limit_diverse(deduped, settings.MAX_LINKS_TO_VALIDATE)
+        deduped = await link_validator.validate_many(deduped)
+        return deduped
 
     async def _get_from_cache(
         self, db: AsyncSession, keyword: str, cloud_types: str

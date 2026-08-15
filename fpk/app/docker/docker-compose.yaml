@@ -4,7 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NODE_IMAGE: ${NODE_IMAGE:-docker.1ms.run/library/node:20-alpine}
         PYTHON_IMAGE: ${PYTHON_IMAGE:-docker.1ms.run/library/python:3.12-slim}
     container_name: cloudlink-finder
     restart: unless-stopped

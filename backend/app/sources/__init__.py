@@ -17,7 +17,8 @@ class SearchResult:
     share_code: str = ""  # 提取码
     description: str = ""  # 资源描述
     file_size: str = ""  # 文件大小
-    source_name: str = ""  # 来源搜索源名称
+    source_name: str = ""  # 来源搜索源名称（用户可见）
+    source_type: str = ""  # 来源搜索源类型标识（内部判断用，不展示）
     rank: float = 0.0  # 排序分数
     validation_status: str = "unchecked"  # valid/invalid/locked/unknown/unchecked
     validation_message: str = ""  # 链接检测说明

@@ -231,8 +231,8 @@ class SearchCoreTests(unittest.TestCase):
         self.assertIn("搜狗搜索", names)
         self.assertIn("百度搜索", names)
         self.assertFalse(next(s["enabled"] for s in sources if s["name"] == "百度搜索"))
-        self.assertIn("PanSou聚合", names)
-        self.assertTrue(next(s["enabled"] for s in sources if s["name"] == "PanSou聚合"))
+        self.assertIn("公开网盘聚合", names)
+        self.assertTrue(next(s["enabled"] for s in sources if s["name"] == "公开网盘聚合"))
         self.assertFalse(next(s["enabled"] for s in sources if s["name"] == "360搜索"))
 
     def test_360_parser_extracts_share_url(self):

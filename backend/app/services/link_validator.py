@@ -88,7 +88,7 @@ class LinkValidator:
             item.verified_title = check.verified_title
             if (
                 check.usable
-                and not item.source_name.startswith("PanSou聚合")
+                and item.source_type != "pansou"
                 and check.verified_title
                 and not self._titles_consistent(item.title, check.verified_title)
             ):
