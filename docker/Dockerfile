@@ -1,9 +1,9 @@
 # 前端产物在打包阶段已预构建（frontend/dist），此处不再引入 Node 构建阶段，
 # 避免 NAS 端拉取 node 镜像与执行 npm install 造成安装长时间卡住或失败。
 #
-# 显式指定公共镜像地址，避免 fnOS 将 docker.io 重定向到需要认证的
-# docker.fnnas.com 后出现 401 Unauthorized。构建时仍可通过 --build-arg 覆盖。
-ARG PYTHON_IMAGE=docker.1ms.run/library/python:3.12-slim
+# 使用 Docker 官方镜像，避免第三方镜像代理（docker.1ms.run 等）网络波动导致安装失败。
+# 构建时仍可通过 --build-arg 覆盖。
+ARG PYTHON_IMAGE=python:3.12-slim
 
 FROM ${PYTHON_IMAGE}
 
